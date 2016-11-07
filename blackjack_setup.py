@@ -1,9 +1,15 @@
 import random
+import sys
+import os
 
 current_hand = []
 dealer_hand = []
-dealer_value = 0
-hand_value = 0
+
+def main():
+    current_hand = None
+    dealer_hand = None
+    blackjack_game()
+
 
 class Card:
     values = {'Ace':1,
@@ -56,13 +62,6 @@ class Deck:
                 c = Card(v, s)
                 self.cards.append(c)
 
-    # def __getitem__(self, index):
-    #     return self.cards[index]
-
-    def hit(self):
-        next_card = self.cards[0]
-        self.cards = self.cards[1]
-        return next_card
 
     def get_next_card(self):
         out = self.cards[self.current_position]
@@ -99,28 +98,69 @@ def get_dealer_value(dealer_hand):
         card_val = int(Card.values[v.value])
         dealer_value += card_val
     return dealer_value
+
+def dealers_turn(a):
+    while get_dealer_value(dealer_hand) < 17:
+        dealer_hand.append(a.get_next_card())
+        print("The dealer hits and recieves {}.".format(dealer_hand[-1]))
+        print("The dealer's hand's value is {}.".format(get_dealer_value(dealer_hand)))
+        if get_dealer_value(dealer_hand) > 21:
+            win_condition()
+    check_game_state()
+
+
+def loss_condition():
+    print("YOU LOSE!!!")
+    print("Your hand's value was {} and the dealer had {}.".format(get_hand_value(current_hand), get_dealer_value(dealer_hand)))
+    game_restart()
+
+def win_condition():
+    print("YOU WIN!!!")
+    print("Your hand's value was {} and the dealer had {}.".format(get_hand_value(current_hand), get_dealer_value(dealer_hand)))
+    game_restart()
+
+def game_restart():
+    restart_option = input("Would you like to play another game? ")
+    if restart_option == "yes":
+        os.execl(sys.executable, sys.executable, *sys.argv)
+    else:
+        exit()
+
+def check_game_state():
+    if get_hand_value(current_hand) > 21:
+        loss_condition()
+    elif get_hand_value(current_hand) > get_dealer_value(dealer_hand):
+        win_condition()
+    elif get_hand_value(current_hand) < get_dealer_value(dealer_hand):
+        loss_condition()
+    else:
+        loss_condition()
+
+
 #
 # a = Deck()
 # a.shuffle()
 #
-def main(dealer_value, hand_value, current_hand, dealer_hand):
+def blackjack_game():
     a = Deck()
     a.shuffle()
     Deck.deal_cards(a)
     print(current_hand)
-    while dealer_value < 22:
-        if hand_value < 22:
+    while True:
+        if get_hand_value(current_hand) < 22:
             print("Your hand's value is: {}".format(get_hand_value(current_hand)))
             action_step = input("Would you like to hit or stand? ")
             if action_step == 'hit':
                 current_hand.append(a.get_next_card())
                 print(current_hand)
             elif action_step == 'stand':
-                if hand_value > dealer_value:
-                    win_condition()
-                else:
-                    loss_condition()
+                dealers_turn(a)
+                check_game_state()
+                # if get_hand_value(current_hand) > get_dealer_value(dealer_hand):
+                #     win_condition()
+                # else:
+                #     loss_condition()
+        elif get_hand_value(current_hand) > 21:
+            loss_condition()
 
-a = Deck()
-a.shuffle()
-main(dealer_value, hand_value, current_hand, dealer_hand)
+main()
