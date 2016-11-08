@@ -102,7 +102,7 @@ def get_dealer_value(dealer_hand):
 def dealers_turn(a):
     while get_dealer_value(dealer_hand) < 17:
         dealer_hand.append(a.get_next_card())
-        print("The dealer hits and recieves {}.".format(dealer_hand[-1]))
+        print("The dealer hits and recieves a {}.".format(dealer_hand[-1]))
         print("The dealer's hand's value is {}.".format(get_dealer_value(dealer_hand)))
         if get_dealer_value(dealer_hand) > 21:
             win_condition()
@@ -137,10 +137,6 @@ def check_game_state():
         loss_condition()
 
 
-#
-# a = Deck()
-# a.shuffle()
-#
 def blackjack_game():
     a = Deck()
     a.shuffle()
@@ -156,10 +152,6 @@ def blackjack_game():
             elif action_step == 'stand':
                 dealers_turn(a)
                 check_game_state()
-                # if get_hand_value(current_hand) > get_dealer_value(dealer_hand):
-                #     win_condition()
-                # else:
-                #     loss_condition()
         elif get_hand_value(current_hand) > 21:
             loss_condition()
 
