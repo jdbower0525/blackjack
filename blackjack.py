@@ -5,7 +5,6 @@ import os
 current_hand = []
 dealer_hand = []
 
-
 def clear():
     if os.name == 'nt':
         os.system('cls')
@@ -33,9 +32,6 @@ class Card:
     def __init__(self, value, suit):
         self.value = value
         self.suit = suit
-
-    def __eq__(self, other):
-        return self.suit == other.suit and self.value == other.value
 
     def get_next_card(self):
         if self.current_position >= len(self.cards):
@@ -102,10 +98,6 @@ def get_dealer_value(dealer_hand):
     return dealer_value
 
 
-def ace_status(current_hand, dealer_hand):
-    pass
-
-
 def dealers_turn(a):
     while get_dealer_value(dealer_hand) < 17:
         clear()
@@ -141,9 +133,7 @@ def game_restart():
 
 
 def check_game_state():
-    if get_hand_value(current_hand) > 21:
-        loss_condition()
-    elif get_hand_value(current_hand) > get_dealer_value(dealer_hand):
+    if get_hand_value(current_hand) > get_dealer_value(dealer_hand):
         win_condition()
     elif get_hand_value(current_hand) < get_dealer_value(dealer_hand):
         loss_condition()
@@ -152,10 +142,14 @@ def check_game_state():
 
 
 def blackjack_game():
+    ace_status = False
     a = Deck()
     a.shuffle()
     Deck.deal_cards(a)
     while True:
+        for v in current_hand:
+            if int(Card.values[v.value]) == 11:
+                ace_status = True
         if get_hand_value(current_hand) < 22:
             clear()
             print("The dealer's face up card is: {}".format(dealer_hand[1]))
@@ -165,12 +159,21 @@ def blackjack_game():
             action_step = input("Would you like to hit or stand? ")
             if action_step[0] == 'h':
                 current_hand.append(a.get_next_card())
+                if Card.values[current_hand[-1].value] == 11 and get_hand_value(current_hand) > 21:
+                    Card.values[current_hand[0].value] = int(Card.values[current_hand[0].value]) - 10
                 print(current_hand)
             elif action_step[0] == 's':
                 dealers_turn(a)
                 check_game_state()
-        elif get_hand_value(current_hand) > 21:
+        elif get_hand_value(current_hand) > 21 and ace_status:
+            if Card.values[current_hand[0].value] < 2:
+                loss_condition()
+            else:
+                print("The value of your Ace was changed to 1.")
+                Card.values[current_hand[0].value] = int(Card.values[current_hand[0].value]) - 10
+        elif get_hand_value(current_hand) > 21 and not ace_status:
             loss_condition()
+
 
 if __name__ == '__main__':
     blackjack_game()
